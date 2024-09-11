@@ -3033,8 +3033,8 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         "--max_token_length",
         type=int,
         default=None,
-        choices=[None, 150, 225],
-        help="max token length of text encoder (default for 75, 150 or 225) / text encoderのトークンの最大長（未指定で75、150または225が指定可）",
+        choices=[None, 150, 225, 300],
+        help="max token length of text encoder (default for 75, 150 or 225 or 300) / text encoder的token最大限制长度_by仙贝（未指定默认75、150和225和300可指定）",
     )
     parser.add_argument(
         "--mem_eff_attn",
@@ -4410,7 +4410,7 @@ def patch_accelerator_for_fp16_training(accelerator):
     accelerator.scaler._unscale_grads_ = _unscale_grads_replacer
 
 
-def get_hidden_states(args: argparse.Namespace, input_ids, tokenizer, text_encoder, weight_dtype=None):
+def get_hidden_states(args: argparse.Namespace, input_ids, tokenizer, text_encoder, accelerator, weight_dtype=None):
     # with no_token_padding, the length is not max length, return result immediately
     if input_ids.size()[-1] != tokenizer.model_max_length:
         return text_encoder(input_ids)[0]
@@ -4424,7 +4424,8 @@ def get_hidden_states(args: argparse.Namespace, input_ids, tokenizer, text_encod
     else:
         enc_out = text_encoder(input_ids, output_hidden_states=True, return_dict=True)
         encoder_hidden_states = enc_out["hidden_states"][-args.clip_skip]
-        encoder_hidden_states = text_encoder.text_model.final_layer_norm(encoder_hidden_states)
+        #encoder_hidden_states = text_encoder.text_model.final_layer_norm(encoder_hidden_states)
+        encoder_hidden_states = accelerator.unwrap_model(text_encoder).text_model.final_layer_norm(encoder_hidden_states) if accelerator else text_encoder.text_model.final_layer_norm(encoder_hidden_states)
 
     # bs*3, 77, 768 or 1024
     encoder_hidden_states = encoder_hidden_states.reshape((b_size, -1, encoder_hidden_states.shape[-1]))

@@ -1,3 +1,73 @@
+正在出于某种目的进行更新和修改。
+
+to do list:
+
+1.启用对于无限训练token的支持:已完成。参见: 
+
+`library\custom_train_functions.py`的`line375`:由3倍增加到4倍
+```python
+max_embeddings_multiples: Optional[int] = 4,
+```
+
+`library\train_util.py`的`line3036`和`line3037`:允许在命令行输入更多token
+```python
+choices=[None, 150, 225, 300],
+help="max token length of text encoder (default for 75, 150 or 225 or 300) "
+```
+
+----
+
+2.修复多卡bug，以及使clip_skip锁定为2(设置非2会报错，因而若您希望使用非2，请阅读并修改以下行)
+
+已完成。参见: 
+
+`fine_tune.py`的`line207`-`line210`：修改
+```python
+# for m in training_models:
+#    m.requires_grad_(True)
+training_models[0].requires_grad_(True)
+# We replace the above lines with the below line so the text encoder require_grad prop is not overridden
+```
+
+`fine_tune.py`的`line197`-`line201`:增加：
+```python
+if args.clip_skip == 2:
+    print("freezing last layer")
+    text_encoder.text_model.encoder.layers[-1].requires_grad_(False)
+    text_encoder.text_model.final_layer_norm.requires_grad_(False)
+```
+
+除以上改动外，文件中包括许多与原版本不同之处，皆为格式性检查，不对功能产生任何影响。
+
+----
+3.cache时，跳过问题图像并输出至目录的功能:已完成。参见: 
+
+`finetune\fine_tune.py`的`line24`
+```python
+error_log_path = os.path.join(os.path.dirname(__file__), 'error_images.txt')
+```
+
+`finetune\fine_tune.py`的`line149`-`line156`
+```python
+try:
+    reso, resized_size, ar_error = bucket_manager.select_bucket(image.width, image.height)
+except Exception as e:
+    logger.error(f"Error processing image: {image_path}, error: {e}")
+    with open(error_log_path, 'a') as f:
+        f.write(f"{image_path}\n")
+    continue
+```
+
+`finetune\fine_tune.py`的`line160`-`line163`:仅注释变更，此段不起实际作用
+```python
+# Metadata update
+metadata[image_key]["train_resolution"] = (reso[0] - reso[0] % 8, reso[1] - reso[1] % 8)
+
+# 本当はこのあとの部分もDataSetに持っていけば高速化できるがいろいろ大変
+```
+
+----
+
 This repository contains training, generation and utility scripts for Stable Diffusion.
 
 [__Change History__](#change-history) is moved to the bottom of the page. 

@@ -21,6 +21,7 @@ from library.utils import setup_logging
 setup_logging()
 import logging
 logger = logging.getLogger(__name__)
+error_log_path = os.path.join(os.path.dirname(__file__), 'error_images.txt')
 
 DEVICE = get_preferred_device()
 
@@ -145,14 +146,21 @@ def main(args):
         if image_key not in metadata:
             metadata[image_key] = {}
 
-        # 本当はこのあとの部分もDataSetに持っていけば高速化できるがいろいろ大変
+        try:
+            reso, resized_size, ar_error = bucket_manager.select_bucket(image.width, image.height)
+        except Exception as e:
+            logger.error(f"Error processing image: {image_path}, error: {e}")
+            with open(error_log_path, 'a') as f:
+                f.write(f"{image_path}\n")
+            continue
 
-        reso, resized_size, ar_error = bucket_manager.select_bucket(image.width, image.height)
         img_ar_errors.append(abs(ar_error))
         bucket_counts[reso] = bucket_counts.get(reso, 0) + 1
 
-        # メタデータに記録する解像度はlatent単位とするので、8単位で切り捨て
+        # Metadata update
         metadata[image_key]["train_resolution"] = (reso[0] - reso[0] % 8, reso[1] - reso[1] % 8)
+
+        # 本当はこのあとの部分もDataSetに持っていけば高速化できるがいろいろ大変
 
         if not args.bucket_no_upscale:
             # upscaleを行わないときには、resize後のサイズは、bucketのサイズと、縦横どちらかが同じであることを確認する

@@ -366,13 +366,13 @@ def get_unweighted_text_embeddings(
             text_embeddings = text_encoder.text_model.final_layer_norm(text_embeddings)
     return text_embeddings
 
-
+# max_embeddings_multiple:3 --> 4, max_tokens:225 --> 300
 def get_weighted_text_embeddings(
     tokenizer,
     text_encoder,
     prompt: Union[str, List[str]],
     device,
-    max_embeddings_multiples: Optional[int] = 3,
+    max_embeddings_multiples: Optional[int] = 4,
     no_boseos_middle: Optional[bool] = False,
     clip_skip=None,
 ):
