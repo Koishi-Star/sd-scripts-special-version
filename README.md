@@ -42,12 +42,12 @@ if args.clip_skip == 2:
 ----
 3.cache时，跳过问题图像并输出至目录的功能:已完成。参见: 
 
-`finetune\fine_tune.py`的`line24`
+`finetune\prepare_buckets_latents.py`的`line24`
 ```python
 error_log_path = os.path.join(os.path.dirname(__file__), 'error_images.txt')
 ```
 
-`finetune\fine_tune.py`的`line149`-`line156`
+`finetune\prepare_buckets_latents.py`的`line149`-`line156`
 ```python
 try:
     reso, resized_size, ar_error = bucket_manager.select_bucket(image.width, image.height)
@@ -58,7 +58,7 @@ except Exception as e:
     continue
 ```
 
-`finetune\fine_tune.py`的`line160`-`line163`:仅注释变更，此段不起实际作用
+`finetune\prepare_buckets_latents.py`的`line160`-`line163`:仅注释变更，此段不起实际作用
 ```python
 # Metadata update
 metadata[image_key]["train_resolution"] = (reso[0] - reso[0] % 8, reso[1] - reso[1] % 8)
