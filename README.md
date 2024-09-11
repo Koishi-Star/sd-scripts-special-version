@@ -1,3 +1,11 @@
+正在出于某种目的进行更新和修改。
+
+to do list:
+
+1.启用对于无限训练token的支持
+2.修复多卡bug
+3.更好的cache
+
 This repository contains training, generation and utility scripts for Stable Diffusion.
 
 [__Change History__](#change-history) is moved to the bottom of the page. 
