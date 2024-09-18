@@ -2,6 +2,22 @@
 
 to do list:
 
+2024.09.18:修改token获取方式，使其huggingface和wandb的token不再暴露在公网，大大增加了安全性
+
+`library\train_util.py`的`line3812-3813`:修改huggingface的token为从环境变量中获取
+```python
+#token=args.huggingface_token,
+token=os.getenv("HUGGINGFACE_TOKEN"),
+```
+
+`library\train_util.py`的`line3812-3813`:修改wandb的token为从环境变量中获取
+```python
+#wandb.login(key=args.wandb_api_key)
+wandb.login(key=os.getenv("WANDB_API_KEY"))
+```
+
+----
+
 1.启用对于无限训练token的支持:已完成。参见: 
 
 `library\custom_train_functions.py`的`line375`:由3倍增加到4倍

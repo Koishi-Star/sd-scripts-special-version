@@ -3797,7 +3797,8 @@ def resume_from_local_or_hf_if_specified(accelerator, args):
         repo_id=repo_id,
         subfolder=path_in_repo,
         revision=revision,
-        token=args.huggingface_token,
+        #token=args.huggingface_token,
+        token=os.getenv("HUGGINGFACE_TOKEN"),
         repo_type=repo_type,
     )
 
@@ -3808,7 +3809,8 @@ def resume_from_local_or_hf_if_specified(accelerator, args):
                 filename=filename,
                 revision=revision,
                 repo_type=repo_type,
-                token=args.huggingface_token,
+                #token=args.huggingface_token,
+                token=os.getenv("HUGGINGFACE_TOKEN"),
             )
 
         return await asyncio.get_event_loop().run_in_executor(None, task)
@@ -4282,7 +4284,8 @@ def prepare_accelerator(args: argparse.Namespace):
                 os.makedirs(logging_dir, exist_ok=True)
                 os.environ["WANDB_DIR"] = logging_dir
             if args.wandb_api_key is not None:
-                wandb.login(key=args.wandb_api_key)
+                #wandb.login(key=args.wandb_api_key)
+                wandb.login(key=os.getenv("WANDB_API_KEY"))
 
     # torch.compile のオプション。 NO の場合は torch.compile は使わない
     dynamo_backend = "NO"
